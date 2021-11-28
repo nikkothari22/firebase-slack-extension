@@ -13,27 +13,33 @@ exports.processMessage = functions.handler.firestore.document
         'Authorization': `Bearer ${authToken}`
     };
     axios.post('https://slack.com/api/chat.postMessage', slackAPIData, { headers })
-        .then(function (response) {
+        .then((response) => {
         functions.logger.info("Message successfully sent");
         if (config_1.default.messageCollection) {
-            admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
+            return admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
                 updatedOn: admin.firestore.FieldValue.serverTimestamp(),
                 response: response.data,
                 status: 'success'
             });
         }
+        else {
+            return;
+        }
     })
-        .catch(function (error) {
+        .catch((error) => {
         if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
             functions.logger.error(error.response.data);
             if (config_1.default.messageCollection) {
-                admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
+                return admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
                     updatedOn: admin.firestore.FieldValue.serverTimestamp(),
                     response: error.response.data,
                     status: 'error'
                 });
+            }
+            else {
+                return;
             }
         }
         else if (error.request) {
@@ -42,22 +48,28 @@ exports.processMessage = functions.handler.firestore.document
             // http.ClientRequest in node.js
             functions.logger.error(error.request);
             if (config_1.default.messageCollection) {
-                admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
+                return admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
                     updatedOn: admin.firestore.FieldValue.serverTimestamp(),
                     response: error.request,
                     status: 'error'
                 });
+            }
+            else {
+                return;
             }
         }
         else {
             // Something happened in setting up the request that triggered an Error
             functions.logger.error('Error', error.message);
             if (config_1.default.messageCollection) {
-                admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
+                return admin.firestore().collection(config_1.default.messageCollection).doc(snap.id).update({
                     updatedOn: admin.firestore.FieldValue.serverTimestamp(),
                     response: error.message,
                     status: 'error'
                 });
+            }
+            else {
+                return;
             }
         }
     });
