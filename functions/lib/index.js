@@ -4,8 +4,19 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const axios = require('axios').default;
 const config_1 = require("./config");
+let initialized = false;
+/**
+ * Initializes Admin SDK & SMTP connection if not already initialized.
+ */
+async function initialize() {
+    if (initialized === true)
+        return;
+    initialized = true;
+    admin.initializeApp();
+}
 exports.processMessage = functions.handler.firestore.document
-    .onCreate((snap, context) => {
+    .onCreate(async (snap, context) => {
+    await initialize();
     const messageDocument = snap.data();
     const { authToken, channel, message } = messageDocument;
     let slackAPIData = Object.assign({ channel }, message);

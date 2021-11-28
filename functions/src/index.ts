@@ -4,9 +4,21 @@ const axios = require('axios').default;
 
 import config from "./config";
 
+let initialized = false;
+
+/**
+ * Initializes Admin SDK & SMTP connection if not already initialized.
+ */
+async function initialize() {
+    if (initialized === true) return;
+    initialized = true;
+    admin.initializeApp();
+}
 
 exports.processMessage = functions.handler.firestore.document
-    .onCreate((snap, context) => {
+    .onCreate(async (snap, context) => {
+
+        await initialize();
         const messageDocument = snap.data();
 
         const { authToken, channel, message } = messageDocument;
